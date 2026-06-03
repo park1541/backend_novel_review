@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.backend_novel_review.novel.repository.NovelRepository">
+
+    <resultMap id="NovelResultMap" type="com.example.backend_novel_review.novel.domain.Novel">
+        <id property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="author" column="author"/>
+        <result property="description" column="description"/>
+        <result property="coverImageUrl" column="cover_image_url"/>
+        <result property="genreId" column="genre_id"/>
+        <result property="genreName" column="genre_name"/>
+        <result property="averageRating" column="average_rating"/>
+        <result property="reviewCount" column="review_count"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <select id="findAll" resultMap="NovelResultMap">
+        SELECT n.id, n.title, n.author, n.description, n.cover_image_url,
+               n.genre_id, g.name AS genre_name, n.created_at,
+               ROUND(AVG(r.rating), 1) AS average_rating,
+               COUNT(r.id) AS review_count
+        FROM novels n
+        LEFT JOIN genres g ON n.genre_id = g.id
+        LEFT JOIN reviews r ON n.id = r.novel_id
+        <where>
+            <if test="genreId != null">AND n.genre_id = #{genreId}</if>
+            <if test="keyword != null and keyword != ''">
+                AND (n.title LIKE CONCAT('%', #{keyword}, '%')
+                OR n.author LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+        </where>
+        GROUP BY n.id, n.title, n.author, n.description, n.cover_image_url, n.genre_id, g.name, n.created_at
+        ORDER BY n.created_at DESC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(*)
+        FROM novels n
+        <where>
+            <if test="genreId != null">AND n.genre_id = #{genreId}</if>
+            <if test="keyword != null and keyword != ''">
+                AND (n.title LIKE CONCAT('%', #{keyword}, '%')
+                OR n.author LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+        </where>
+    </select>
+
+    <select id="findById" resultMap="NovelResultMap">
+        SELECT n.id, n.title, n.author, n.description, n.cover_image_url,
+               n.genre_id, g.name AS genre_name, n.created_at,
+               ROUND(AVG(r.rating), 1) AS average_rating,
+               COUNT(r.id) AS review_count
+        FROM novels n
+        LEFT JOIN genres g ON n.genre_id = g.id
+        LEFT JOIN reviews r ON n.id = r.novel_id
+        WHERE n.id = #{id}
+        GROUP BY n.id, n.title, n.author, n.description, n.cover_image_url, n.genre_id, g.name, n.created_at
+    </select>
+
+    <insert id="save" parameterType="com.example.backend_novel_review.novel.dto.NovelRequest">
+        INSERT INTO novels (title, author, description, cover_image_url, genre_id)
+        VALUES (#{title}, #{author}, #{description}, #{coverImageUrl}, #{genreId})
+    </insert>
+
+    <update id="update">
+        UPDATE novels
+        SET title = #{req.title},
+            author = #{req.author},
+            description = #{req.description},
+            cover_image_url = #{req.coverImageUrl},
+            genre_id = #{req.genreId}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM novels WHERE id = #{id}
+    </delete>
+
+</mapper>
