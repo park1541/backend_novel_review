@@ -37,10 +37,13 @@ public class OAuthAttributes {
     @SuppressWarnings("unchecked")
     private static OAuthAttributes ofNaver(Map<String, Object> attributes) {
         Map<String, Object> response = (Map<String, Object>) attributes.get("response");
+        String providerId = (String) response.get("id");
+        String email = (String) response.get("email");
+        if (email == null) email = "naver_" + providerId + "@naver.com";
         return OAuthAttributes.builder()
             .provider("NAVER")
-            .providerId((String) response.get("id"))
-            .email((String) response.get("email"))
+            .providerId(providerId)
+            .email(email)
             .nickname((String) response.get("nickname"))
             .profileImageUrl((String) response.get("profile_image"))
             .build();
@@ -50,12 +53,15 @@ public class OAuthAttributes {
     private static OAuthAttributes ofKakao(Map<String, Object> attributes) {
         Map<String, Object> kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
         Map<String, Object> properties = (Map<String, Object>) attributes.get("properties");
+        String providerId = String.valueOf(attributes.get("id"));
+        String email = kakaoAccount != null ? (String) kakaoAccount.get("email") : null;
+        if (email == null) email = "kakao_" + providerId + "@kakao.com";
         return OAuthAttributes.builder()
             .provider("KAKAO")
-            .providerId(String.valueOf(attributes.get("id")))
-            .email((String) kakaoAccount.get("email"))
-            .nickname((String) properties.get("nickname"))
-            .profileImageUrl((String) properties.get("profile_image"))
+            .providerId(providerId)
+            .email(email)
+            .nickname(properties != null ? (String) properties.get("nickname") : "카카오유저")
+            .profileImageUrl(properties != null ? (String) properties.get("profile_image") : null)
             .build();
     }
 
