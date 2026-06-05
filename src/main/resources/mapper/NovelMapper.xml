@@ -80,4 +80,8 @@
         DELETE FROM novels WHERE id = #{id}
     </delete>
 
+    <select id="countByGenreId" resultType="long">
+        SELECT COUNT(*) FROM novels WHERE genre_id = #{genreId}
+    </select>
+
 </mapper>

@@ -24,4 +24,6 @@ public interface NovelRepository {
     void update(@Param("id") Long id, @Param("req") NovelRequest request);
 
     void delete(@Param("id") Long id);
+
+    long countByGenreId(@Param("genreId") Long genreId);
 }
