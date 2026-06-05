@@ -26,6 +26,10 @@
         SELECT * FROM users WHERE id = #{id}
     </select>
 
+    <select id="findAll" resultMap="UserResultMap">
+        SELECT * FROM users ORDER BY created_at DESC
+    </select>
+
     <insert id="save" parameterType="com.example.backend_novel_review.user.domain.User">
         INSERT INTO users (email, nickname, profile_image_url, role, provider, provider_id)
         VALUES (#{email}, #{nickname}, #{profileImageUrl}, #{role}, #{provider}, #{providerId})
