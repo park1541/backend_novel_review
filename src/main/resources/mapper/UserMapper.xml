@@ -12,6 +12,7 @@
         <result property="role" column="role"/>
         <result property="provider" column="provider"/>
         <result property="providerId" column="provider_id"/>
+        <result property="socialAccessToken" column="social_access_token"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
     </resultMap>
@@ -31,15 +32,20 @@
     </select>
 
     <insert id="save" parameterType="com.example.backend_novel_review.user.domain.User">
-        INSERT INTO users (email, nickname, profile_image_url, role, provider, provider_id)
-        VALUES (#{email}, #{nickname}, #{profileImageUrl}, #{role}, #{provider}, #{providerId})
+        INSERT INTO users (email, nickname, profile_image_url, role, provider, provider_id, social_access_token)
+        VALUES (#{email}, #{nickname}, #{profileImageUrl}, #{role}, #{provider}, #{providerId}, #{socialAccessToken})
     </insert>
 
     <update id="update" parameterType="com.example.backend_novel_review.user.domain.User">
         UPDATE users
         SET nickname = #{nickname},
-            profile_image_url = #{profileImageUrl}
+            profile_image_url = #{profileImageUrl},
+            social_access_token = #{socialAccessToken}
         WHERE id = #{id}
     </update>
+
+    <delete id="deleteById">
+        DELETE FROM users WHERE id = #{id}
+    </delete>
 
 </mapper>

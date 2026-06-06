@@ -21,22 +21,23 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         OAuth2User oAuth2User = super.loadUser(userRequest);
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
+        String accessToken = userRequest.getAccessToken().getTokenValue();
 
         OAuthAttributes attributes = OAuthAttributes.of(registrationId, oAuth2User.getAttributes());
-        User user = saveOrUpdate(attributes);
+        User user = saveOrUpdate(attributes, accessToken);
 
         return UserPrincipal.of(user, oAuth2User.getAttributes());
     }
 
-    public User saveOrUpdate(OAuthAttributes attributes) {
+    public User saveOrUpdate(OAuthAttributes attributes, String accessToken) {
         return userRepository.findByProviderAndProviderId(attributes.getProvider(), attributes.getProviderId())
             .map(existing -> {
-                User updated = existing.update(attributes.getNickname(), attributes.getProfileImageUrl());
+                User updated = existing.update(attributes.getNickname(), attributes.getProfileImageUrl(), accessToken);
                 userRepository.update(updated);
                 return updated;
             })
             .orElseGet(() -> {
-                User newUser = attributes.toEntity();
+                User newUser = attributes.toEntity(accessToken);
                 userRepository.save(newUser);
                 return userRepository.findByProviderAndProviderId(
                     attributes.getProvider(), attributes.getProviderId()).orElseThrow();

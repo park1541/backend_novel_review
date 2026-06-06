@@ -20,9 +20,10 @@
 
     <select id="findByNovelId" resultMap="ReviewResultMap">
         SELECT r.id, r.novel_id, r.user_id, r.rating, r.content, r.created_at, r.updated_at,
-               u.nickname AS author_nickname, u.profile_image_url AS author_profile_image_url
+               CASE WHEN u.id IS NULL THEN '탈퇴된 회원' ELSE u.nickname END AS author_nickname,
+               CASE WHEN u.id IS NULL THEN NULL ELSE u.profile_image_url END AS author_profile_image_url
         FROM reviews r
-        JOIN users u ON r.user_id = u.id
+        LEFT JOIN users u ON r.user_id = u.id
         WHERE r.novel_id = #{novelId}
         ORDER BY r.created_at DESC
         LIMIT #{size} OFFSET #{offset}
@@ -63,6 +64,10 @@
 
     <delete id="delete">
         DELETE FROM reviews WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteByUserId">
+        DELETE FROM reviews WHERE user_id = #{userId}
     </delete>
 
 </mapper>

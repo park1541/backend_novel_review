@@ -21,8 +21,9 @@ public class CustomOidcUserService extends OidcUserService {
         OidcUser oidcUser = super.loadUser(userRequest);
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
 
+        String accessToken = userRequest.getAccessToken().getTokenValue();
         OAuthAttributes attributes = OAuthAttributes.of(registrationId, oidcUser.getAttributes());
-        User user = customOAuth2UserService.saveOrUpdate(attributes);
+        User user = customOAuth2UserService.saveOrUpdate(attributes, accessToken);
 
         return UserPrincipal.ofOidc(user, oidcUser.getAttributes(), oidcUser.getIdToken(), oidcUser.getUserInfo());
     }

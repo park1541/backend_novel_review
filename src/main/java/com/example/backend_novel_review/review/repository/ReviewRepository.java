@@ -33,4 +33,6 @@ public interface ReviewRepository {
                 @Param("content") String content);
 
     void delete(@Param("id") Long id);
+
+    void deleteByUserId(@Param("userId") Long userId);
 }

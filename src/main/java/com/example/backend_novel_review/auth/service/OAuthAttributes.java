@@ -65,7 +65,7 @@ public class OAuthAttributes {
             .build();
     }
 
-    public User toEntity() {
+    public User toEntity(String socialAccessToken) {
         return User.builder()
             .email(email)
             .nickname(nickname)
@@ -73,6 +73,7 @@ public class OAuthAttributes {
             .role("USER")
             .provider(provider)
             .providerId(providerId)
+            .socialAccessToken(socialAccessToken)
             .build();
     }
 }
