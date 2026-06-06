@@ -12,6 +12,7 @@ import java.util.Optional;
 public interface NovelRepository {
     List<Novel> findAll(@Param("genreId") Long genreId,
                         @Param("keyword") String keyword,
+                        @Param("sortBy") String sortBy,
                         @Param("offset") int offset,
                         @Param("size") int size);
 

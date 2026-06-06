@@ -33,7 +33,12 @@
             </if>
         </where>
         GROUP BY n.id, n.title, n.author, n.description, n.cover_image_url, n.genre_id, g.name, n.created_at
-        ORDER BY n.created_at DESC
+        ORDER BY
+        <choose>
+            <when test="sortBy == 'rating'">average_rating DESC, review_count DESC, n.created_at DESC</when>
+            <when test="sortBy == 'reviews'">review_count DESC, average_rating DESC, n.created_at DESC</when>
+            <otherwise>n.created_at DESC</otherwise>
+        </choose>
         LIMIT #{size} OFFSET #{offset}
     </select>
 

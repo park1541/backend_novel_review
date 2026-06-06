@@ -22,10 +22,11 @@ public class NovelController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "12") int size,
             @RequestParam(required = false) Long genreId,
-            @RequestParam(required = false) String keyword) {
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "latest") String sortBy) {
 
         int offset = page * size;
-        List<Novel> novels = novelRepository.findAll(genreId, keyword, offset, size);
+        List<Novel> novels = novelRepository.findAll(genreId, keyword, sortBy, offset, size);
         long total = novelRepository.count(genreId, keyword);
         long totalPages = (total + size - 1) / size;
 
