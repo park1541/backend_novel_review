@@ -19,6 +19,8 @@ public class Review {
     private String authorProfileImageUrl;
     private String novelTitle;
     private String novelCoverImageUrl;
+    private long likeCount;
+    private boolean liked;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

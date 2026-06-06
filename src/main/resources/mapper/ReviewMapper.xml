@@ -14,6 +14,7 @@
         <result property="authorProfileImageUrl" column="author_profile_image_url"/>
         <result property="novelTitle" column="novel_title"/>
         <result property="novelCoverImageUrl" column="novel_cover_image_url"/>
+        <result property="likeCount" column="like_count"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
     </resultMap>
@@ -21,7 +22,8 @@
     <select id="findByNovelId" resultMap="ReviewResultMap">
         SELECT r.id, r.novel_id, r.user_id, r.rating, r.content, r.created_at, r.updated_at,
                CASE WHEN u.id IS NULL THEN '탈퇴된 회원' ELSE u.nickname END AS author_nickname,
-               CASE WHEN u.id IS NULL THEN NULL ELSE u.profile_image_url END AS author_profile_image_url
+               CASE WHEN u.id IS NULL THEN NULL ELSE u.profile_image_url END AS author_profile_image_url,
+               (SELECT COUNT(*) FROM review_likes rl WHERE rl.review_id = r.id) AS like_count
         FROM reviews r
         LEFT JOIN users u ON r.user_id = u.id
         WHERE r.novel_id = #{novelId}

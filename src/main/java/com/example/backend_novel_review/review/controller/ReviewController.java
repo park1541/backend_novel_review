@@ -2,10 +2,12 @@ package com.example.backend_novel_review.review.controller;
 
 import com.example.backend_novel_review.review.domain.Review;
 import com.example.backend_novel_review.review.dto.ReviewRequest;
+import com.example.backend_novel_review.review.repository.ReviewLikeRepository;
 import com.example.backend_novel_review.review.repository.ReviewRepository;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,6 +19,7 @@ import java.util.Map;
 public class ReviewController {
 
     private final ReviewRepository reviewRepository;
+    private final ReviewLikeRepository reviewLikeRepository;
 
     // 소설의 리뷰 목록
     @GetMapping("/api/novels/{novelId}/reviews")
@@ -30,6 +33,12 @@ public class ReviewController {
         long total = reviewRepository.countByNovelId(novelId);
         long totalPages = (total + size - 1) / size;
 
+        // 로그인한 경우 liked 여부 세팅
+        Long userId = getOptionalUserId();
+        if (userId != null) {
+            reviews.forEach(r -> r.setLiked(reviewLikeRepository.exists(r.getId(), userId)));
+        }
+
         return ResponseEntity.ok(Map.of(
             "content", reviews,
             "page", page,
@@ -37,6 +46,20 @@ public class ReviewController {
             "totalElements", total,
             "totalPages", totalPages
         ));
+    }
+
+    // 리뷰 좋아요 토글
+    @PostMapping("/api/reviews/{reviewId}/likes")
+    public ResponseEntity<?> toggleLike(@PathVariable Long reviewId) {
+        Long userId = getCurrentUserId();
+        boolean alreadyLiked = reviewLikeRepository.exists(reviewId, userId);
+        if (alreadyLiked) {
+            reviewLikeRepository.delete(reviewId, userId);
+        } else {
+            reviewLikeRepository.save(reviewId, userId);
+        }
+        long likeCount = reviewLikeRepository.countByReviewId(reviewId);
+        return ResponseEntity.ok(Map.of("liked", !alreadyLiked, "likeCount", likeCount));
     }
 
     // 리뷰 작성
@@ -109,6 +132,18 @@ public class ReviewController {
     private Long getCurrentUserId() {
         Claims claims = (Claims) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return Long.parseLong(claims.getSubject());
+    }
+
+    private Long getOptionalUserId() {
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth == null || !auth.isAuthenticated()) return null;
+            Object principal = auth.getPrincipal();
+            if (!(principal instanceof Claims)) return null;
+            return Long.parseLong(((Claims) principal).getSubject());
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private String getCurrentUserRole() {
