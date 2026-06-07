@@ -37,7 +37,7 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfig.corsConfigurationSource()))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/oauth2/**", "/login/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/novels/**", "/api/genres").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/novels", "/api/novels/**", "/api/genres").permitAll()
                 .requestMatchers("/api/auth/me").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/novels/*/reviews").authenticated()
                 .requestMatchers(HttpMethod.POST, "/api/reviews/*/likes").authenticated()
