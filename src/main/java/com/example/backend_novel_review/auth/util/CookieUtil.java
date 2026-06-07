@@ -13,10 +13,10 @@ public class CookieUtil {
     public static void addAccessTokenCookie(HttpServletResponse response, String token) {
         ResponseCookie cookie = ResponseCookie.from("access_token", token)
             .httpOnly(true)
-            .secure(false)       // 운영환경에서는 true로 변경
+            .secure(true)
             .path("/")
             .maxAge(3600)
-            .sameSite("Lax")
+            .sameSite("None")
             .build();
         response.addHeader("Set-Cookie", cookie.toString());
     }
@@ -24,10 +24,10 @@ public class CookieUtil {
     public static void deleteAccessTokenCookie(HttpServletResponse response) {
         ResponseCookie cookie = ResponseCookie.from("access_token", "")
             .httpOnly(true)
-            .secure(false)
+            .secure(true)
             .path("/")
             .maxAge(0)
-            .sameSite("Lax")
+            .sameSite("None")
             .build();
         response.addHeader("Set-Cookie", cookie.toString());
     }

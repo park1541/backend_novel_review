@@ -37,8 +37,10 @@ src/main/java/com/example/backend_novel_review/
 │   ├── dto/NovelRequest.java
 │   └── controller/NovelController.java
 ├── review/
-│   ├── domain/Review.java
+│   ├── domain/Review.java                   # likeCount, liked 필드 포함
+│   ├── domain/ReviewLike.java
 │   ├── repository/ReviewRepository.java     # delete, deleteByUserId 포함
+│   ├── repository/ReviewLikeRepository.java # save, delete, exists, countByReviewId
 │   ├── dto/ReviewRequest.java
 │   └── controller/ReviewController.java
 └── genre/
@@ -53,6 +55,7 @@ src/main/resources/mapper/
 ├── UserMapper.xml
 ├── NovelMapper.xml
 ├── ReviewMapper.xml
+├── ReviewLikeMapper.xml
 └── GenreMapper.xml
 ```
 
@@ -60,17 +63,18 @@ src/main/resources/mapper/
 - DB: MariaDB, 포트: 3306
 - DB명: study_db
 - 유저: study_user / mariadb
-- 테이블: users, novels, genres, reviews
+- 테이블: users, novels, genres, reviews, review_likes
 
 ## DB 특이사항
 - reviews.user_id: NULL 허용 + ON DELETE SET NULL (자진 탈퇴 시 리뷰 유지)
 - users.social_access_token: 로그인 시 소셜 access_token 저장 (연동 해제용)
 - novels.cover_image_url: TEXT 타입 (긴 URL 허용)
+- review_likes: review_id + user_id UNIQUE, 둘 다 ON DELETE CASCADE
 
 ## API 엔드포인트
 ### 공개 (인증 불필요)
 - GET /api/genres
-- GET /api/novels
+- GET /api/novels?page=0&size=12&genreId=&keyword=&sortBy=latest  # sortBy: latest(기본)/rating/reviews
 - GET /api/novels/{id}
 - GET /api/novels/{novelId}/reviews
 - GET /api/auth/me (비로그인 시 401)
@@ -80,6 +84,7 @@ src/main/resources/mapper/
 - POST /api/novels/{novelId}/reviews
 - PUT /api/reviews/{reviewId}
 - DELETE /api/reviews/{reviewId}
+- POST /api/reviews/{reviewId}/likes  # 좋아요 토글 (liked, likeCount 반환)
 - GET /api/users/me/reviews
 - DELETE /api/users/me         # 자진 탈퇴 (리뷰 유지, 소셜 연동 해제)
 
