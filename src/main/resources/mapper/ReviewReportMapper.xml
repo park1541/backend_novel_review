@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.backend_novel_review.review.repository.ReviewReportRepository">
+
+    <insert id="save">
+        INSERT INTO review_reports (review_id, reporter_id, reason)
+        VALUES (#{reviewId}, #{reporterId}, #{reason})
+    </insert>
+
+    <select id="findAll" resultType="com.example.backend_novel_review.review.domain.ReviewReport">
+        SELECT
+            rr.id,
+            rr.review_id    AS reviewId,
+            rr.reporter_id  AS reporterId,
+            u.nickname      AS reporterNickname,
+            r.content       AS reviewContent,
+            rr.reason,
+            rr.created_at   AS createdAt
+        FROM review_reports rr
+        LEFT JOIN users u ON rr.reporter_id = u.id
+        LEFT JOIN reviews r ON rr.review_id = r.id
+        ORDER BY rr.created_at DESC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+    <select id="countAll" resultType="long">
+        SELECT COUNT(*) FROM review_reports
+    </select>
+
+    <select id="existsByReviewIdAndReporterId" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM review_reports
+        WHERE review_id = #{reviewId} AND reporter_id = #{reporterId}
+    </select>
+
+    <delete id="deleteById">
+        DELETE FROM review_reports WHERE id = #{id}
+    </delete>
+
+</mapper>
