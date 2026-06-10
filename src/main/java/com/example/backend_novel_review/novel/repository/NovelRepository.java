@@ -18,6 +18,10 @@ public interface NovelRepository {
 
     long count(@Param("genreId") Long genreId, @Param("keyword") String keyword);
 
+    List<Novel> findRankings(@Param("type") String type,
+                             @Param("period") String period,
+                             @Param("genreId") Long genreId);
+
     Optional<Novel> findById(@Param("id") Long id);
 
     void save(NovelRequest request);

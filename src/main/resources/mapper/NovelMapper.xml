@@ -42,6 +42,32 @@
         LIMIT #{size} OFFSET #{offset}
     </select>
 
+    <!-- 랭킹: 기간 내 작성된 리뷰만 집계 (리뷰 없는 소설은 INNER JOIN으로 자동 제외) -->
+    <select id="findRankings" resultMap="NovelResultMap">
+        SELECT n.id, n.title, n.author, n.description, n.cover_image_url,
+               n.genre_id, g.name AS genre_name, n.created_at,
+               ROUND(AVG(r.rating), 1) AS average_rating,
+               COUNT(r.id) AS review_count
+        FROM novels n
+        INNER JOIN reviews r ON n.id = r.novel_id
+        LEFT JOIN genres g ON n.genre_id = g.id
+        <where>
+            <choose>
+                <when test="period == 'daily'">r.created_at &gt;= NOW() - INTERVAL 1 DAY</when>
+                <when test="period == 'weekly'">r.created_at &gt;= NOW() - INTERVAL 7 DAY</when>
+                <when test="period == 'monthly'">r.created_at &gt;= NOW() - INTERVAL 30 DAY</when>
+            </choose>
+            <if test="genreId != null">AND n.genre_id = #{genreId}</if>
+        </where>
+        GROUP BY n.id, n.title, n.author, n.description, n.cover_image_url, n.genre_id, g.name, n.created_at
+        ORDER BY
+        <choose>
+            <when test="type == 'reviews'">review_count DESC, average_rating DESC, n.created_at DESC</when>
+            <otherwise>average_rating DESC, review_count DESC, n.created_at DESC</otherwise>
+        </choose>
+        LIMIT 10
+    </select>
+
     <select id="count" resultType="long">
         SELECT COUNT(*)
         FROM novels n

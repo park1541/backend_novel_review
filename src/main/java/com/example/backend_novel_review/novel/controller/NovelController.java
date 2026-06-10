@@ -39,6 +39,16 @@ public class NovelController {
         ));
     }
 
+    // 랭킹 조회 - /{id}보다 정확한 경로가 우선 매칭됨
+    @GetMapping("/rankings")
+    public ResponseEntity<?> getRankings(
+            @RequestParam(defaultValue = "rating") String type,
+            @RequestParam(defaultValue = "all") String period,
+            @RequestParam(required = false) Long genreId) {
+        List<Novel> novels = novelRepository.findRankings(type, period, genreId);
+        return ResponseEntity.ok(novels);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<?> getNovel(@PathVariable Long id) {
         return novelRepository.findById(id)
