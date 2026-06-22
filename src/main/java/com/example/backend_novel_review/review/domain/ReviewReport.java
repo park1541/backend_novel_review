@@ -17,6 +17,8 @@ public class ReviewReport {
     private String reviewContent;
     private Long novelId;
     private String novelTitle;
+    private String novelGenre;
+    private String novelDescription;
     private String reason;
     private LocalDateTime createdAt;
 }
