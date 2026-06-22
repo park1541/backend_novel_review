@@ -15,6 +15,8 @@ public class ReviewReport {
     private Long reporterId;
     private String reporterNickname;
     private String reviewContent;
+    private Long novelId;
+    private String novelTitle;
     private String reason;
     private LocalDateTime createdAt;
 }

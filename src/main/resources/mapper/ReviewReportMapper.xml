@@ -16,11 +16,14 @@
             rr.reporter_id  AS reporterId,
             u.nickname      AS reporterNickname,
             r.content       AS reviewContent,
+            n.id            AS novelId,
+            n.title         AS novelTitle,
             rr.reason,
             rr.created_at   AS createdAt
         FROM review_reports rr
         LEFT JOIN users u ON rr.reporter_id = u.id
         LEFT JOIN reviews r ON rr.review_id = r.id
+        LEFT JOIN novels n ON r.novel_id = n.id
         ORDER BY rr.created_at DESC
         LIMIT #{size} OFFSET #{offset}
     </select>
