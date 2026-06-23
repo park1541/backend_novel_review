@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.example.backend_novel_review.inquiry.repository.InquiryRepository">
+<mapper namespace="com.example.backend_novel_review.inquiry.mapper.InquiryMapper">
 
     <sql id="selectColumns">
         SELECT i.id,
@@ -23,18 +23,18 @@
         VALUES (#{userId}, #{category}, #{title}, #{content})
     </insert>
 
-    <select id="findByUserId" resultType="com.example.backend_novel_review.inquiry.domain.Inquiry">
+    <select id="findByUserId" resultType="com.example.backend_novel_review.inquiry.dto.Inquiry">
         <include refid="selectColumns"/>
         WHERE i.user_id = #{userId}
         ORDER BY i.created_at DESC
     </select>
 
-    <select id="findById" resultType="com.example.backend_novel_review.inquiry.domain.Inquiry">
+    <select id="findById" resultType="com.example.backend_novel_review.inquiry.dto.Inquiry">
         <include refid="selectColumns"/>
         WHERE i.id = #{id}
     </select>
 
-    <select id="findAll" resultType="com.example.backend_novel_review.inquiry.domain.Inquiry">
+    <select id="findAll" resultType="com.example.backend_novel_review.inquiry.dto.Inquiry">
         <include refid="selectColumns"/>
         ORDER BY i.created_at DESC
         LIMIT #{size} OFFSET #{offset}

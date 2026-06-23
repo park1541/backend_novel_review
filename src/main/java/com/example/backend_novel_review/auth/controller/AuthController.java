@@ -1,8 +1,8 @@
 package com.example.backend_novel_review.auth.controller;
 
 import com.example.backend_novel_review.auth.util.CookieUtil;
-import com.example.backend_novel_review.user.domain.User;
-import com.example.backend_novel_review.user.repository.UserRepository;
+import com.example.backend_novel_review.user.dto.User;
+import com.example.backend_novel_review.user.mapper.UserMapper;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -22,7 +22,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
     @GetMapping("/me")
     public ResponseEntity<?> getMe(HttpServletRequest request) {
@@ -39,7 +39,7 @@ public class AuthController {
         Claims claims = (Claims) authentication.getPrincipal();
         Long userId = Long.parseLong(claims.getSubject());
 
-        return userRepository.findById(userId)
+        return userMapper.findById(userId)
             .map(user -> ResponseEntity.ok(Map.of(
                 "id", user.getId(),
                 "email", user.getEmail(),

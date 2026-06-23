@@ -1,21 +1,17 @@
 package com.example.backend_novel_review.novel.controller;
 
-import com.example.backend_novel_review.novel.domain.Novel;
 import com.example.backend_novel_review.novel.dto.NovelRequest;
-import com.example.backend_novel_review.novel.repository.NovelRepository;
+import com.example.backend_novel_review.novel.service.NovelService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/novels")
 @RequiredArgsConstructor
 public class NovelController {
 
-    private final NovelRepository novelRepository;
+    private final NovelService novelService;
 
     @GetMapping
     public ResponseEntity<?> getNovels(
@@ -24,53 +20,37 @@ public class NovelController {
             @RequestParam(required = false) Long genreId,
             @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "latest") String sortBy) {
-
-        int offset = page * size;
-        List<Novel> novels = novelRepository.findAll(genreId, keyword, sortBy, offset, size);
-        long total = novelRepository.count(genreId, keyword);
-        long totalPages = (total + size - 1) / size;
-
-        return ResponseEntity.ok(Map.of(
-            "content", novels,
-            "page", page,
-            "size", size,
-            "totalElements", total,
-            "totalPages", totalPages
-        ));
+        return ResponseEntity.ok(novelService.getNovels(page, size, genreId, keyword, sortBy));
     }
 
-    // 랭킹 조회 - /{id}보다 정확한 경로가 우선 매칭됨
     @GetMapping("/rankings")
     public ResponseEntity<?> getRankings(
             @RequestParam(defaultValue = "rating") String type,
             @RequestParam(defaultValue = "all") String period,
             @RequestParam(required = false) Long genreId) {
-        List<Novel> novels = novelRepository.findRankings(type, period, genreId);
-        return ResponseEntity.ok(novels);
+        return ResponseEntity.ok(novelService.getRankings(type, period, genreId));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getNovel(@PathVariable Long id) {
-        return novelRepository.findById(id)
-            .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(novelService.getNovel(id));
     }
 
     @PostMapping
     public ResponseEntity<?> createNovel(@RequestBody NovelRequest request) {
-        novelRepository.save(request);
+        novelService.createNovel(request);
         return ResponseEntity.status(201).build();
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateNovel(@PathVariable Long id, @RequestBody NovelRequest request) {
-        novelRepository.update(id, request);
+        novelService.updateNovel(id, request);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteNovel(@PathVariable Long id) {
-        novelRepository.delete(id);
+        novelService.deleteNovel(id);
         return ResponseEntity.noContent().build();
     }
 }

@@ -2,9 +2,9 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.example.backend_novel_review.genre.repository.GenreRepository">
+<mapper namespace="com.example.backend_novel_review.genre.mapper.GenreMapper">
 
-    <select id="findAll" resultType="com.example.backend_novel_review.genre.domain.Genre">
+    <select id="findAll" resultType="com.example.backend_novel_review.genre.dto.Genre">
         SELECT id, name FROM genres ORDER BY id
     </select>
 

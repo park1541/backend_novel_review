@@ -1,6 +1,6 @@
 package com.example.backend_novel_review.auth.service;
 
-import com.example.backend_novel_review.user.domain.User;
+import com.example.backend_novel_review.user.dto.User;
 import lombok.Builder;
 import lombok.Getter;
 

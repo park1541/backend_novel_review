@@ -1,6 +1,6 @@
 package com.example.backend_novel_review.auth.dto;
 
-import com.example.backend_novel_review.user.domain.User;
+import com.example.backend_novel_review.user.dto.User;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

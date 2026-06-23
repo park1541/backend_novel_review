@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.example.backend_novel_review.review.repository.ReviewLikeRepository">
+<mapper namespace="com.example.backend_novel_review.review.mapper.ReviewLikeMapper">
 
     <insert id="save">
         INSERT INTO review_likes (review_id, user_id) VALUES (#{reviewId}, #{userId})

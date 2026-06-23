@@ -1,7 +1,7 @@
 package com.example.backend_novel_review.auth.service;
 
 import com.example.backend_novel_review.auth.dto.UserPrincipal;
-import com.example.backend_novel_review.user.domain.User;
+import com.example.backend_novel_review.user.dto.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;

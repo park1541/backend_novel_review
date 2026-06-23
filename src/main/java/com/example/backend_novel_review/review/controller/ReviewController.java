@@ -1,11 +1,7 @@
 package com.example.backend_novel_review.review.controller;
 
-import com.example.backend_novel_review.review.domain.Review;
-import com.example.backend_novel_review.review.domain.ReviewReport;
 import com.example.backend_novel_review.review.dto.ReviewRequest;
-import com.example.backend_novel_review.review.repository.ReviewLikeRepository;
-import com.example.backend_novel_review.review.repository.ReviewReportRepository;
-import com.example.backend_novel_review.review.repository.ReviewRepository;
+import com.example.backend_novel_review.review.service.ReviewService;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -13,16 +9,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
 public class ReviewController {
 
-    private final ReviewRepository reviewRepository;
-    private final ReviewLikeRepository reviewLikeRepository;
-    private final ReviewReportRepository reviewReportRepository;
+    private final ReviewService reviewService;
 
     // 소설의 리뷰 목록
     @GetMapping("/api/novels/{novelId}/reviews")
@@ -30,47 +23,20 @@ public class ReviewController {
             @PathVariable Long novelId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-
-        int offset = page * size;
-        List<Review> reviews = reviewRepository.findByNovelId(novelId, offset, size);
-        long total = reviewRepository.countByNovelId(novelId);
-        long totalPages = (total + size - 1) / size;
-
-        // 로그인한 경우 liked 여부 세팅
-        Long userId = getOptionalUserId();
-        if (userId != null) {
-            reviews.forEach(r -> r.setLiked(reviewLikeRepository.exists(r.getId(), userId)));
-        }
-
-        return ResponseEntity.ok(Map.of(
-            "content", reviews,
-            "page", page,
-            "size", size,
-            "totalElements", total,
-            "totalPages", totalPages
-        ));
+        return ResponseEntity.ok(reviewService.getReviews(novelId, page, size, getOptionalUserId()));
     }
 
     // 리뷰 좋아요 토글
     @PostMapping("/api/reviews/{reviewId}/likes")
     public ResponseEntity<?> toggleLike(@PathVariable Long reviewId) {
-        Long userId = getCurrentUserId();
-        boolean alreadyLiked = reviewLikeRepository.exists(reviewId, userId);
-        if (alreadyLiked) {
-            reviewLikeRepository.delete(reviewId, userId);
-        } else {
-            reviewLikeRepository.save(reviewId, userId);
-        }
-        long likeCount = reviewLikeRepository.countByReviewId(reviewId);
-        return ResponseEntity.ok(Map.of("liked", !alreadyLiked, "likeCount", likeCount));
+        return ResponseEntity.ok(reviewService.toggleLike(reviewId, getCurrentUserId()));
     }
 
     // 리뷰 작성
     @PostMapping("/api/novels/{novelId}/reviews")
     public ResponseEntity<?> createReview(@PathVariable Long novelId,
                                           @RequestBody ReviewRequest request) {
-        Long userId = getCurrentUserId();
-        reviewRepository.save(novelId, userId, request.getRating(), request.getContent());
+        reviewService.createReview(novelId, getCurrentUserId(), request);
         return ResponseEntity.status(201).build();
     }
 
@@ -78,36 +44,14 @@ public class ReviewController {
     @PutMapping("/api/reviews/{reviewId}")
     public ResponseEntity<?> updateReview(@PathVariable Long reviewId,
                                           @RequestBody ReviewRequest request) {
-        Long userId = getCurrentUserId();
-        Review review = reviewRepository.findById(reviewId)
-            .orElse(null);
-
-        if (review == null) return ResponseEntity.notFound().build();
-
-        String role = getCurrentUserRole();
-        if (!review.getUserId().equals(userId) && !"ADMIN".equals(role)) {
-            return ResponseEntity.status(403).build();
-        }
-
-        reviewRepository.update(reviewId, request.getRating(), request.getContent());
+        reviewService.updateReview(reviewId, getCurrentUserId(), getCurrentUserRole(), request);
         return ResponseEntity.ok().build();
     }
 
     // 리뷰 삭제
     @DeleteMapping("/api/reviews/{reviewId}")
     public ResponseEntity<?> deleteReview(@PathVariable Long reviewId) {
-        Long userId = getCurrentUserId();
-        Review review = reviewRepository.findById(reviewId)
-            .orElse(null);
-
-        if (review == null) return ResponseEntity.notFound().build();
-
-        String role = getCurrentUserRole();
-        if (!review.getUserId().equals(userId) && !"ADMIN".equals(role)) {
-            return ResponseEntity.status(403).build();
-        }
-
-        reviewRepository.delete(reviewId);
+        reviewService.deleteReview(reviewId, getCurrentUserId(), getCurrentUserRole());
         return ResponseEntity.noContent().build();
     }
 
@@ -116,35 +60,14 @@ public class ReviewController {
     public ResponseEntity<?> getMyReviews(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-
-        Long userId = getCurrentUserId();
-        int offset = page * size;
-        List<Review> reviews = reviewRepository.findByUserId(userId, offset, size);
-        long total = reviewRepository.countByUserId(userId);
-        long totalPages = (total + size - 1) / size;
-
-        return ResponseEntity.ok(Map.of(
-            "content", reviews,
-            "page", page,
-            "size", size,
-            "totalElements", total,
-            "totalPages", totalPages
-        ));
+        return ResponseEntity.ok(reviewService.getMyReviews(getCurrentUserId(), page, size));
     }
 
     // 리뷰 신고 등록
     @PostMapping("/api/reviews/{reviewId}/reports")
     public ResponseEntity<?> reportReview(@PathVariable Long reviewId,
                                           @RequestBody Map<String, String> body) {
-        Long reporterId = getCurrentUserId();
-        String reason = body.get("reason");
-        if (reason == null || reason.isBlank()) {
-            return ResponseEntity.badRequest().body(Map.of("message", "신고 이유를 입력해주세요."));
-        }
-        if (reviewReportRepository.existsByReviewIdAndReporterId(reviewId, reporterId)) {
-            return ResponseEntity.status(409).body(Map.of("message", "이미 신고한 리뷰입니다."));
-        }
-        reviewReportRepository.save(reviewId, reporterId, reason);
+        reviewService.reportReview(reviewId, getCurrentUserId(), body.get("reason"));
         return ResponseEntity.status(201).build();
     }
 
@@ -153,23 +76,13 @@ public class ReviewController {
     public ResponseEntity<?> getReviewReports(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        int offset = page * size;
-        List<ReviewReport> reports = reviewReportRepository.findAll(offset, size);
-        long total = reviewReportRepository.countAll();
-        long totalPages = (total + size - 1) / size;
-        return ResponseEntity.ok(Map.of(
-            "content", reports,
-            "page", page,
-            "size", size,
-            "totalElements", total,
-            "totalPages", totalPages
-        ));
+        return ResponseEntity.ok(reviewService.getReviewReports(page, size));
     }
 
     // [관리자] 신고 거절 (신고만 삭제)
     @DeleteMapping("/api/admin/review-reports/{id}")
     public ResponseEntity<?> dismissReport(@PathVariable Long id) {
-        reviewReportRepository.deleteById(id);
+        reviewService.dismissReport(id);
         return ResponseEntity.noContent().build();
     }
 
@@ -177,9 +90,11 @@ public class ReviewController {
     @DeleteMapping("/api/admin/review-reports/{id}/delete-review/{reviewId}")
     public ResponseEntity<?> deleteReviewByReport(@PathVariable Long id,
                                                    @PathVariable Long reviewId) {
-        reviewRepository.delete(reviewId);
+        reviewService.deleteReviewByReport(reviewId);
         return ResponseEntity.noContent().build();
     }
+
+    // --- SecurityContext에서 인증 정보 추출 (web 계층 관심사) ---
 
     private Long getCurrentUserId() {
         Claims claims = (Claims) SecurityContextHolder.getContext().getAuthentication().getPrincipal();

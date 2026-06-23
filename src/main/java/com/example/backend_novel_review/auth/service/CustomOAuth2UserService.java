@@ -1,8 +1,8 @@
 package com.example.backend_novel_review.auth.service;
 
 import com.example.backend_novel_review.auth.dto.UserPrincipal;
-import com.example.backend_novel_review.user.domain.User;
-import com.example.backend_novel_review.user.repository.UserRepository;
+import com.example.backend_novel_review.user.dto.User;
+import com.example.backend_novel_review.user.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
-    private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
     // 네이버, 카카오 (일반 OAuth2)
     @Override
@@ -30,16 +30,16 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     }
 
     public User saveOrUpdate(OAuthAttributes attributes, String accessToken) {
-        return userRepository.findByProviderAndProviderId(attributes.getProvider(), attributes.getProviderId())
+        return userMapper.findByProviderAndProviderId(attributes.getProvider(), attributes.getProviderId())
             .map(existing -> {
                 User updated = existing.update(attributes.getNickname(), attributes.getProfileImageUrl(), accessToken);
-                userRepository.update(updated);
+                userMapper.update(updated);
                 return updated;
             })
             .orElseGet(() -> {
                 User newUser = attributes.toEntity(accessToken);
-                userRepository.save(newUser);
-                return userRepository.findByProviderAndProviderId(
+                userMapper.save(newUser);
+                return userMapper.findByProviderAndProviderId(
                     attributes.getProvider(), attributes.getProviderId()).orElseThrow();
             });
     }
