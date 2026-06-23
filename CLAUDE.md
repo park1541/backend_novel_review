@@ -59,13 +59,16 @@ src/main/resources/mapper/
 - DB: MariaDB, 포트: 3306
 - DB명: study_db
 - 유저: study_user / mariadb
-- 테이블: users, novels, genres, reviews, review_likes
+- 테이블: users, novels, genres, reviews, review_likes, review_reports, search_logs, inquiries
 
 ## DB 특이사항
 - reviews.user_id: NULL 허용 + ON DELETE SET NULL (자진 탈퇴 시 리뷰 유지)
 - users.social_access_token: 로그인 시 소셜 access_token 저장 (연동 해제용)
 - novels.cover_image_url: TEXT 타입 (긴 URL 허용)
 - review_likes: review_id + user_id UNIQUE, 둘 다 ON DELETE CASCADE
+- review_reports: review_id + reporter_id UNIQUE (중복 신고 방지)
+- search_logs: keyword + ip_address 기록 (IP 기반 1시간 중복 방지로 순위 조작 차단)
+- inquiries: answer NULL 여부로 답변 상태 판단
 
 ## API 엔드포인트
 ### 공개 (인증 불필요)
