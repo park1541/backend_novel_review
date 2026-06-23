@@ -8,6 +8,12 @@
 - Lombok, Gradle
 
 ## 프로젝트 구조
+도메인별 패키지 안에 `controller → service → mapper → dto` 4계층을 두는 구조.
+- **controller**: HTTP 요청/응답, 인증 정보(userId·role) 추출 후 service 호출
+- **service**: 비즈니스 로직, 트랜잭션(`@Transactional`), 존재·권한 검증(`ResponseStatusException`)
+- **mapper**: MyBatis 매퍼 인터페이스 (`@Mapper`, `resources/mapper/*.xml`와 매핑)
+- **dto**: 계층 간 데이터 운반 객체 (기존 domain 폴더 대체)
+
 ```
 src/main/java/com/example/backend_novel_review/
 ├── config/
@@ -27,26 +33,13 @@ src/main/java/com/example/backend_novel_review/
 │   ├── filter/JwtAuthenticationFilter.java  # 매 요청 JWT 검증
 │   ├── dto/UserPrincipal.java               # SecurityContext 사용자 객체
 │   └── util/CookieUtil.java                 # HttpOnly 쿠키 생성/삭제
-├── user/
-│   ├── domain/User.java
-│   ├── repository/UserRepository.java       # findByProviderAndProviderId, findById, findAll, save, update, deleteById
-│   └── controller/UserController.java       # GET /api/admin/users, DELETE /api/users/me, DELETE /api/admin/users/{id}
-├── novel/
-│   ├── domain/Novel.java
-│   ├── repository/NovelRepository.java
-│   ├── dto/NovelRequest.java
-│   └── controller/NovelController.java
-├── review/
-│   ├── domain/Review.java                   # likeCount, liked 필드 포함
-│   ├── domain/ReviewLike.java
-│   ├── repository/ReviewRepository.java     # delete, deleteByUserId 포함
-│   ├── repository/ReviewLikeRepository.java # save, delete, exists, countByReviewId
-│   ├── dto/ReviewRequest.java
-│   └── controller/ReviewController.java
-└── genre/
-    ├── domain/Genre.java
-    ├── repository/GenreRepository.java
-    └── controller/GenreController.java
+├── user/        controller / service / mapper(UserMapper) / dto(User)
+├── novel/       controller / service / mapper(NovelMapper) / dto(Novel, NovelRequest)
+├── genre/       controller / service / mapper(GenreMapper) / dto(Genre)
+├── review/      controller / service / mapper(ReviewMapper, ReviewLikeMapper, ReviewReportMapper)
+│                                      / dto(Review, ReviewLike, ReviewReport, ReviewRequest)
+├── inquiry/     controller / service / mapper(InquiryMapper) / dto(Inquiry)
+└── search/      controller / service / mapper(SearchLogMapper) / dto(SearchLog)
 ```
 
 ## MyBatis 매퍼 위치
@@ -54,9 +47,12 @@ src/main/java/com/example/backend_novel_review/
 src/main/resources/mapper/
 ├── UserMapper.xml
 ├── NovelMapper.xml
+├── GenreMapper.xml
 ├── ReviewMapper.xml
 ├── ReviewLikeMapper.xml
-└── GenreMapper.xml
+├── ReviewReportMapper.xml
+├── InquiryMapper.xml
+└── SearchLogMapper.xml
 ```
 
 ## DB 정보

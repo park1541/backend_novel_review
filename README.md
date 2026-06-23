@@ -15,6 +15,35 @@
 | Build | Gradle |
 | Deploy | Railway + Docker |
 
+## 프로젝트 구조
+
+도메인별 패키지 안에 `controller → service → mapper → dto` 4계층을 두는 구조로 설계했습니다.
+
+```
+src/main/java/com/example/backend_novel_review/
+├── config/              # Security, CORS 설정
+├── auth/                # 인증 (OAuth2 로그인, JWT 필터/핸들러)
+│   ├── controller/  service/  handler/  filter/  dto/  util/
+├── user/                # 회원
+│   ├── controller/      # HTTP 요청/응답, 인증 정보 추출
+│   ├── service/         # 비즈니스 로직, 트랜잭션, 권한·검증
+│   ├── mapper/          # MyBatis 매퍼 인터페이스
+│   └── dto/             # 데이터 운반 객체
+├── novel/               # 소설
+├── genre/               # 장르
+├── review/              # 리뷰 (좋아요·신고 포함)
+├── inquiry/             # 1:1 문의
+└── search/              # 검색어 로그
+        ↑ user 외 도메인도 동일하게 controller / service / mapper / dto 구성
+```
+
+| 계층 | 역할 |
+|------|------|
+| **controller** | HTTP 요청/응답 처리, 인증 정보(userId·role) 추출 후 service 호출 |
+| **service** | 비즈니스 로직, 트랜잭션(`@Transactional`), 존재·권한 검증(`ResponseStatusException`) |
+| **mapper** | MyBatis 매퍼 인터페이스 (`resources/mapper/*.xml`와 매핑) |
+| **dto** | 계층 간 데이터 운반 객체 |
+
 ## 주요 기능
 
 - **소셜 로그인**: Google / Naver / Kakao OAuth2 소셜 로그인
