@@ -20,7 +20,7 @@
     <select id="findAll" resultMap="NovelResultMap">
         SELECT n.id, n.title, n.author, n.description, n.cover_image_url,
                n.genre_id, g.name AS genre_name, n.created_at,
-               ROUND(AVG(r.rating), 1) AS average_rating,
+               ROUND(AVG(r.rating)::numeric, 1) AS average_rating,
                COUNT(r.id) AS review_count
         FROM novels n
         LEFT JOIN genres g ON n.genre_id = g.id
@@ -46,16 +46,16 @@
     <select id="findRankings" resultMap="NovelResultMap">
         SELECT n.id, n.title, n.author, n.description, n.cover_image_url,
                n.genre_id, g.name AS genre_name, n.created_at,
-               ROUND(AVG(r.rating), 1) AS average_rating,
+               ROUND(AVG(r.rating)::numeric, 1) AS average_rating,
                COUNT(r.id) AS review_count
         FROM novels n
         INNER JOIN reviews r ON n.id = r.novel_id
         LEFT JOIN genres g ON n.genre_id = g.id
         <where>
             <choose>
-                <when test="period == 'daily'">r.created_at &gt;= NOW() - INTERVAL 1 DAY</when>
-                <when test="period == 'weekly'">r.created_at &gt;= NOW() - INTERVAL 7 DAY</when>
-                <when test="period == 'monthly'">r.created_at &gt;= NOW() - INTERVAL 30 DAY</when>
+                <when test="period == 'daily'">r.created_at &gt;= NOW() - INTERVAL '1 day'</when>
+                <when test="period == 'weekly'">r.created_at &gt;= NOW() - INTERVAL '7 days'</when>
+                <when test="period == 'monthly'">r.created_at &gt;= NOW() - INTERVAL '30 days'</when>
             </choose>
             <if test="genreId != null">AND n.genre_id = #{genreId}</if>
         </where>
@@ -83,7 +83,7 @@
     <select id="findById" resultMap="NovelResultMap">
         SELECT n.id, n.title, n.author, n.description, n.cover_image_url,
                n.genre_id, g.name AS genre_name, n.created_at,
-               ROUND(AVG(r.rating), 1) AS average_rating,
+               ROUND(AVG(r.rating)::numeric, 1) AS average_rating,
                COUNT(r.id) AS review_count
         FROM novels n
         LEFT JOIN genres g ON n.genre_id = g.id

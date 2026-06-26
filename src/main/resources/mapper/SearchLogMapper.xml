@@ -14,14 +14,14 @@
         FROM search_logs
         WHERE keyword = #{keyword}
           AND ip_address = #{ipAddress}
-          AND created_at &gt;= NOW() - INTERVAL 1 HOUR
+          AND created_at &gt;= NOW() - INTERVAL '1 hour'
     </select>
 
     <!-- 최근 7일간 검색 횟수 TOP 5 -->
     <select id="findPopular" resultType="com.example.backend_novel_review.search.dto.SearchLog">
         SELECT keyword, COUNT(*) AS count
         FROM search_logs
-        WHERE created_at &gt;= NOW() - INTERVAL 7 DAY
+        WHERE created_at &gt;= NOW() - INTERVAL '7 days'
         GROUP BY keyword
         ORDER BY count DESC, MAX(created_at) DESC
         LIMIT 5

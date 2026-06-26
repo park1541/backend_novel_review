@@ -4,16 +4,10 @@
       <pattern>%d{yyyyMMdd HH:mm:ss.SSS} [%thread] %-3level %logger{5} - %msg %n</pattern>
     </encoder>
   </appender>
-  
-  <logger name="jdbc" level="OFF"/>
-  
-  <logger name="jdbc.sqlonly" level="OFF"/>
-  <logger name="jdbc.sqltiming" level="DEBUG"/>
-  <logger name="jdbc.audit" level="OFF"/>
-  <logger name="jdbc.resultset" level="OFF"/>
-  <logger name="jdbc.resultsettable" level="DEBUG"/>
-  <logger name="jdbc.connection" level="OFF"/>
-  
+
+  <!-- MyBatis 매퍼 SQL 로그 (DEBUG면 실행 쿼리 출력) -->
+  <logger name="com.example.backend_novel_review" level="DEBUG"/>
+
   <root level="INFO">
     <appender-ref ref="STDOUT" />
   </root>
