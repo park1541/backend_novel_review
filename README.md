@@ -10,10 +10,10 @@
 | Framework | Spring Boot 4.0.6 |
 | Security | Spring Security 6 + OAuth2 Client |
 | ORM | MyBatis |
-| Database | MariaDB |
+| Database | PostgreSQL (Supabase) |
 | Auth | JWT (JJWT 0.12.6) + HttpOnly Cookie |
 | Build | Gradle |
-| Deploy | Railway + Docker |
+| Deploy | Render + Docker |
 
 ## 프로젝트 구조
 
@@ -75,7 +75,7 @@ src/main/java/com/example/backend_novel_review/
 
 - **XSS 방어**: JWT를 HttpOnly 쿠키에 저장 (JS에서 접근 불가)
 - **CORS**: 허용된 출처만 접근 (환경변수 `FRONTEND_URL`로 관리)
-- **SameSite=None + Secure**: 크로스 오리진 배포 환경(Vercel ↔ Railway) 대응
+- **SameSite=None + Secure**: 크로스 오리진 배포 환경(Vercel ↔ Render) 대응
 - **환경변수 분리**: OAuth2 키, JWT 시크릿 등 민감 정보는 환경변수로 관리
 
 ## API 엔드포인트
@@ -173,10 +173,15 @@ GRANT ALL ON study_db.* TO 'study_user'@'localhost';
 
 ## 배포
 
-- **플랫폼**: Railway
-- **DB**: Railway MariaDB (Docker 이미지)
+- **플랫폼**: Render (Web Service, Docker)
+- **DB**: Supabase (PostgreSQL, Session pooler 연결)
 - **컨테이너**: Dockerfile 기반 빌드 (eclipse-temurin:17)
-- **환경변수**: Railway Variables에서 관리
+- **환경변수**: Render Environment Variables에서 관리
+- **포트**: Render가 주입하는 `PORT`로 listen (`server.port=${PORT:8080}`)
+
+> ⏳ **콜드 스타트**: 무료 플랜이라 일정 시간 미사용 시 서버가 잠듭니다. 첫 요청 시 깨어나는 데 **30초~1분** 정도 걸릴 수 있습니다 (이후엔 정상 속도).
+
+> 이전 기록: 기존 **Railway + MariaDB**에서 **Render + Supabase(PostgreSQL)**로 이전. MyBatis 네이티브 쿼리의 DB 종속 문법(`INTERVAL`, `ROUND` 등)을 PostgreSQL에 맞게 변환.
 
 ```dockerfile
 FROM eclipse-temurin:17-jdk AS build
